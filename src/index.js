@@ -28,6 +28,7 @@ const cards = [
 const memoryGame = new MemoryGame(cards);
 
 window.addEventListener('load', (event) => {
+  event = memoryGame.shuffleCards();
   let html = '';
   memoryGame.cards.forEach((pic) => {
     html += `
@@ -44,8 +45,38 @@ window.addEventListener('load', (event) => {
   // Bind the click event of each element to a function
   document.querySelectorAll('.card').forEach((card) => {
     card.addEventListener('click', () => {
-      // TODO: write some code here
+      card.classList.add('turned');
       console.log(`Card clicked: ${card}`);
+      if (memoryGame.pickedCards.length < 2) {
+        memoryGame.pickedCards.push(card);
+      }
+      if (memoryGame.pickedCards.length === 2) {
+        const fCard = memoryGame.pickedCards[0];
+        const sCard = memoryGame.pickedCards[1];
+        if (memoryGame.checkIfPair(fCard.getAttribute("data-card-name"), sCard.getAttribute("data-card-name"))) {
+          fCard.classList.add('blocked');
+          sCard.classList.add('blocked');
+          memoryGame.pickedCards = [];
+          const guessed = document.getElementById("pairs-guessed");
+          guessed.innerHTML = memoryGame.pairsGuessed;
+        } else {
+          setTimeout(function () {
+            fCard.classList.remove('turned');
+            sCard.classList.remove('turned');
+            memoryGame.pickedCards = [];
+            const clicked = document.getElementById("pairs-clicked");
+            clicked.innerHTML = memoryGame.pairsClicked;
+          }, 500);
+        }
+        if (memoryGame.checkIfFinished()) {
+          if (memoryGame.pairsClicked === 24) {
+            alert("Are you a medium?! Congrats on making no mistakes");
+          }
+          else if (memoryGame.pairsClicked < 40) {
+            alert("Amazing job!");
+          }
+        }
+      }
     });
   });
 });
